@@ -1,0 +1,92 @@
+package br.edu.ifpb.bd.projeto.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import br.edu.ifpb.bd.projeto.model.Aluno;
+import br.edu.ifpb.bd.projeto.model.Fornecedor;
+import br.edu.ifpb.bd.projeto.util.ConnectionFactory;
+
+@Repository
+public class FornecedorDAO {
+    
+    public void salvar(Fornecedor fornecedor) throws Exception {
+        String sql = "INSERT INTO fornecedor " +
+        "(cnpj, nome) " +
+        "VALUES (?, ?)";
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, fornecedor.getCnpj());
+            ps.setString(2, fornecedor.getNome());
+            ps.execute();
+        }
+    }
+
+    
+    
+    public List<Fornecedor> listar() throws Exception {
+        List<Fornecedor> lista = new ArrayList<>();
+        String sql = "SELECT * FROM fornecedor";
+        try (Connection c = ConnectionFactory.getConnection();
+             Statement st = c.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+             while (rs.next()) {
+                   lista.add(new Fornecedor(
+                           rs.getString("cnpj"),
+                           rs.getString("nome")
+                   ));
+             }
+        }
+        return lista;
+    }
+
+    
+    public void atualizar(Fornecedor fornecedor) throws Exception {
+        String sql =
+          "UPDATE fornecedor SET cnpj=?, nome=?, " + 
+          "WHERE id=?";
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, fornecedor.getCnpj());
+            ps.setString(2, fornecedor.getNome());
+
+            ps.execute();
+        }
+    }
+
+
+    public Fornecedor buscar(Integer id) throws Exception {
+        String sql = "SELECT * FROM fornecedor WHERE id=?";
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Fornecedor a = new Fornecedor();
+                a.setId(id);
+                a.setCnpj(rs.getString("cnpj"));
+                a.setNome(rs.getString("nome"));
+                return a;
+            }
+        }
+        return null;
+    }
+
+
+    public void excluir(Integer id) throws Exception {
+        String sql = "DELETE FROM fornecedor WHERE id=?";
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.execute();
+        }
+    }
+}
+
